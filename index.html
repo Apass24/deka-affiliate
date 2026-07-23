@@ -194,7 +194,7 @@ h1,h2,h3{font-family:var(--display);font-weight:400;text-transform:uppercase;mar
 .gate{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(6,6,7,.82);backdrop-filter:blur(8px);animation:gateIn .35s ease}
 @keyframes gateIn{from{opacity:0}to{opacity:1}}
 .gate[hidden]{display:none}
-.gate-card{position:relative;width:min(500px,100%);background:var(--ink-2);border:1px solid var(--line);border-radius:16px;padding:clamp(26px,5vw,42px);overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+.gate-card{position:relative;width:min(500px,100%);max-height:calc(100dvh - 40px);overflow-y:auto;overflow-x:hidden;background:var(--ink-2);border:1px solid var(--line);border-radius:16px;padding:clamp(26px,5vw,42px);box-shadow:0 30px 80px rgba(0,0,0,.6)}
 .gate-card::before{content:"";position:absolute;left:0;right:0;top:0;height:6px;background:linear-gradient(90deg,var(--gold),#F79B12 42%,var(--flare) 72%,var(--red))}
 .gate-card::after{content:"";position:absolute;right:-50px;bottom:-50px;width:240px;height:240px;background:radial-gradient(circle,rgba(224,39,28,.20),transparent 70%);pointer-events:none}
 .gate-x{position:absolute;top:12px;right:14px;background:none;border:0;color:var(--mute);font-size:26px;line-height:1;cursor:pointer;padding:4px;z-index:2}
@@ -204,6 +204,14 @@ h1,h2,h3{font-family:var(--display);font-weight:400;text-transform:uppercase;mar
 .gate-title em{font-style:normal;color:var(--red)}
 .gate-sub{color:#C6C3BD;font-size:16px;margin:0 0 22px;max-width:42ch}
 .gate-form{display:grid;gap:12px}
+.gate-picklabel{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--mute);margin:6px 0 -4px}
+.gate-pick{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media(max-width:460px){.gate-pick{grid-template-columns:1fr}}
+.gate-pick label{position:relative;display:flex;align-items:center;justify-content:center;text-align:center;min-height:54px;padding:10px 12px;border:1px solid var(--line);border-radius:9px;color:#C6C3BD;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;line-height:1.3;cursor:pointer;transition:border-color .2s ease,background .2s ease,color .2s ease}
+.gate-pick label:hover{border-color:var(--mute)}
+.gate-pick input{position:absolute;opacity:0;width:1px;height:1px}
+.gate-pick label:has(input:checked){border-color:var(--red);background:rgba(224,39,28,.14);color:var(--paper)}
+.gate-pick label:has(input:focus-visible){outline:2px solid var(--gold);outline-offset:2px}
 .gate-input{width:100%;background:#0F0F12;border:1px solid var(--line);border-radius:9px;color:var(--paper);font-family:var(--body);font-size:16px;padding:15px 16px}
 .gate-input:focus{outline:none;border-color:var(--red)}
 .gate-input::placeholder{color:#7C7A76}
@@ -230,12 +238,18 @@ body.gate-open{overflow:hidden}
     <p class="gate-sub">Enter your name and email for a chance to win a free DEKA race entry &mdash; and we&rsquo;ll send you the affiliate details.</p>
     <form class="gate-form" id="gateForm" novalidate>
       <input class="gate-input" id="gateName" name="name" type="text" placeholder="Full name" autocomplete="name" required>
-      <input class="gate-input" id="gateEmail" name="email" type="email" placeholder="Email address" autocomplete="email" required>
+      <input class="gate-input" id="gateEmail" name="email" type="email" placeholder="Best email address" autocomplete="email" required>
+      <p class="gate-picklabel">Pick one</p>
+      <div class="gate-pick">
+        <label><input type="radio" name="role" value="Gym/Studio owner or coach"><span>Gym / studio owner or coach</span></label>
+        <label><input type="radio" name="role" value="Member/Client/Fitness enthusiast"><span>Member / client / fitness enthusiast</span></label>
+      </div>
+      <input class="gate-input" id="gateGym" name="gym" type="text" placeholder="Gym / facility name" autocomplete="organization">
       <button class="gate-btn" id="gateSubmit" type="submit"><span>Enter to win</span><span>&rarr;</span></button>
-      <p class="gate-err" id="gateErr" hidden>Please enter your name and a valid email.</p>
+      <p class="gate-err" id="gateErr" hidden>Please complete the fields above.</p>
     </form>
     <button class="gate-skip" id="gateSkip" type="button">No thanks, just show me the page</button>
-    <p class="gate-fine">No purchase necessary. One entry per person. Winner notified by email. By entering you agree to receive DEKA affiliate updates. Void where prohibited.</p>
+    <p class="gate-fine">No purchase necessary, one entry, winner notified by email, void where prohibited.</p>
   </div>
 </div>
 
@@ -582,8 +596,12 @@ body.gate-open{overflow:hidden}
     e.preventDefault();
     var name=document.getElementById('gateName').value.trim();
     var email=document.getElementById('gateEmail').value.trim();
+    var gym=document.getElementById('gateGym').value.trim();
+    var roleEl=document.querySelector('input[name="role"]:checked');
+    var role=roleEl?roleEl.value:'';
     var err=document.getElementById('gateErr');
     if(name.length<2 || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ err.textContent='Please enter your name and a valid email.'; err.hidden=false; return; }
+    if(!role){ err.textContent='Please pick one: owner/coach or member.'; err.hidden=false; return; }
     err.hidden=true;
     var btn=document.getElementById('gateSubmit'); btn.disabled=true; btn.innerHTML='<span>Submitting…</span>';
     function success(){
@@ -593,11 +611,11 @@ body.gate-open{overflow:hidden}
     }
     function fail(){ btn.disabled=false; btn.innerHTML='<span>Enter to win</span><span>→</span>'; err.textContent='Something went wrong — please try again.'; err.hidden=false; }
     if(!LEAD_ENDPOINT){ success(); return; } /* preview mode: no destination wired yet */
-    var req, fd=new FormData(); fd.append('name',name); fd.append('email',email);
+    var req, fd=new FormData(); fd.append('name',name); fd.append('email',email); fd.append('role',role); fd.append('gym',gym);
     if(LEAD_MODE==='hubspot'){
       req=fetch('https://api.hsforms.com/submissions/v3/integration/submit/'+HS_PORTAL+'/'+HS_FORM,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fields:[{name:'firstname',value:name},{name:'email',value:email}]})});
     } else if(LEAD_MODE==='sheet'){
-      req=fetch(LEAD_ENDPOINT,{method:'POST',mode:'no-cors',body:new URLSearchParams({name:name,email:email})});
+      req=fetch(LEAD_ENDPOINT,{method:'POST',mode:'no-cors',body:new URLSearchParams({name:name,email:email,role:role,gym:gym})});
     } else {
       req=fetch(LEAD_ENDPOINT,{method:'POST',headers:{'Accept':'application/json'},body:fd});
     }
