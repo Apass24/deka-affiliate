@@ -244,6 +244,16 @@ body.gate-open{overflow:hidden}
 .gate-share .alt a:hover,.gate-share .alt button:hover{border-color:var(--red);background:rgba(224,39,28,.14)}
 .gate-share .alt a:active,.gate-share .alt button:active{transform:scale(.97)}
 .gate-share .alt .ic{font-size:20px;line-height:1}
+.gate-refer{margin:18px 0 2px;padding:16px 0 0;border-top:1px solid var(--line)}
+.gate-refer .refer-label{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);margin:0 0 10px;text-align:center}
+.gate-refer input{width:100%;background:#0F0F12;border:1px solid var(--line);border-radius:9px;color:var(--paper);font-family:var(--body);font-size:15px;padding:13px 14px;margin:0 0 8px}
+.gate-refer input:focus{outline:none;border-color:var(--red)}
+.gate-refer input::placeholder{color:#7C7A76}
+.refer-btn{width:100%;background:none;border:1px solid var(--red);color:var(--paper);border-radius:9px;font-family:var(--display);font-weight:400;font-size:16px;text-transform:uppercase;letter-spacing:.03em;padding:12px;cursor:pointer;transition:background .2s ease}
+.refer-btn:hover{background:rgba(224,39,28,.14)}
+.refer-btn:disabled{opacity:.6;cursor:default}
+.refer-err{color:#ff6a5c;font-family:var(--mono);font-size:11px;margin:6px 0 0;text-align:center}
+.refer-done{font-family:var(--body);font-size:14.5px;color:#C6C3BD;text-align:center;margin:4px 0 0;padding:6px 0}
 .gate-toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(12px);z-index:300;background:#0F0F12;border:1px solid var(--line);color:var(--paper);font-family:var(--mono);font-size:12px;letter-spacing:.05em;padding:12px 18px;border-radius:10px;box-shadow:0 16px 40px rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .25s ease,transform .25s ease}
 .gate-toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
@@ -652,12 +662,34 @@ body.gate-open{overflow:hidden}
                 +'<button type="button" id="gateCopyBtn"><span class="ic" aria-hidden="true">🔗</span>Copy</button>'
               +'</div>'
             +'</div>'
+            +'<div class="gate-refer">'
+              +'<p class="refer-label">Want us to reach out too? Add your owner’s info</p>'
+              +'<input id="refName" type="text" placeholder="Owner’s name" autocomplete="off">'
+              +'<input id="refEmail" type="email" placeholder="Owner’s email" autocomplete="off">'
+              +'<button class="refer-btn" id="refSend" type="button">Send the intro &rarr;</button>'
+              +'<p class="refer-err" id="refErr" hidden></p>'
+            +'</div>'
             +'<button class="gate-skip" id="gateSkip2" type="button">Maybe later — show me the page</button>'
           +'</div>';
         document.getElementById('gateShareBtn').addEventListener('click',shareDeka);
         document.getElementById('gateCopyBtn').addEventListener('click',copyLink);
         document.getElementById('gateClose2').addEventListener('click',function(){closeGate();});
         document.getElementById('gateSkip2').addEventListener('click',function(){closeGate();});
+        document.getElementById('refSend').addEventListener('click',function(){
+          var on=document.getElementById('refName').value.trim();
+          var oe=document.getElementById('refEmail').value.trim();
+          var re=document.getElementById('refErr');
+          if(on.length<2 || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(oe)){ re.textContent='Enter your owner’s name and a valid email.'; re.hidden=false; return; }
+          re.hidden=true;
+          var rb=document.getElementById('refSend'); rb.disabled=true; rb.textContent='Sending…';
+          if(LEAD_ENDPOINT){
+            if(LEAD_MODE==='sheet'){ fetch(LEAD_ENDPOINT,{method:'POST',mode:'no-cors',body:new URLSearchParams({type:'owner-referral',owner_name:on,owner_email:oe,referred_by_name:name,referred_by_email:email})}); }
+            else { var rfd=new FormData(); rfd.append('type','owner-referral'); rfd.append('owner_name',on); rfd.append('owner_email',oe); rfd.append('referred_by_name',name); rfd.append('referred_by_email',email); fetch(LEAD_ENDPOINT,{method:'POST',headers:{'Accept':'application/json'},body:rfd}).catch(function(){}); }
+          }
+          var mail='mailto:'+oe+'?subject=Will%20you%20bring%20DEKA%20to%20our%20gym%3F&body='+encodeURIComponent(SHARE_TEXT+' '+SHARE_URL);
+          document.querySelector('.gate-refer').innerHTML='<p class="refer-done">Nice — we’ve got it. Opening an intro email for you to send; we’ll follow up too.</p>';
+          setTimeout(function(){ window.location.href=mail; }, 300);
+        });
       } else {
         card.innerHTML='<p class="gate-kicker">You’re entered</p><div class="gate-success"><h3>You’re in.</h3><p>If you win, we’ll contact you this week at the email you provided.</p></div>';
         setTimeout(closeGate, 2800);
