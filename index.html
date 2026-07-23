@@ -189,9 +189,56 @@ h1,h2,h3{font-family:var(--display);font-weight:400;text-transform:uppercase;mar
   .dock{transition:none}
 }
 
+
+/* ---------- lead capture gate ---------- */
+.gate{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(6,6,7,.82);backdrop-filter:blur(8px);animation:gateIn .35s ease}
+@keyframes gateIn{from{opacity:0}to{opacity:1}}
+.gate[hidden]{display:none}
+.gate-card{position:relative;width:min(500px,100%);background:var(--ink-2);border:1px solid var(--line);border-radius:16px;padding:clamp(26px,5vw,42px);overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+.gate-card::before{content:"";position:absolute;left:0;right:0;top:0;height:6px;background:linear-gradient(90deg,var(--gold),#F79B12 42%,var(--flare) 72%,var(--red))}
+.gate-card::after{content:"";position:absolute;right:-50px;bottom:-50px;width:240px;height:240px;background:radial-gradient(circle,rgba(224,39,28,.20),transparent 70%);pointer-events:none}
+.gate-x{position:absolute;top:12px;right:14px;background:none;border:0;color:var(--mute);font-size:26px;line-height:1;cursor:pointer;padding:4px;z-index:2}
+.gate-x:hover{color:var(--paper)}
+.gate-kicker{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--red);margin:4px 0 12px}
+.gate-title{font-family:var(--display);font-weight:400;font-size:clamp(34px,7vw,52px);line-height:.9;text-transform:uppercase;margin:0 0 14px}
+.gate-title em{font-style:normal;color:var(--red)}
+.gate-sub{color:#C6C3BD;font-size:16px;margin:0 0 22px;max-width:42ch}
+.gate-form{display:grid;gap:12px}
+.gate-input{width:100%;background:#0F0F12;border:1px solid var(--line);border-radius:9px;color:var(--paper);font-family:var(--body);font-size:16px;padding:15px 16px}
+.gate-input:focus{outline:none;border-color:var(--red)}
+.gate-input::placeholder{color:#7C7A76}
+.gate-btn{margin-top:2px;display:flex;align-items:center;justify-content:center;gap:10px;background:var(--red);color:#fff;border:0;border-radius:9px;font-family:var(--display);font-size:20px;text-transform:uppercase;letter-spacing:.03em;padding:16px;cursor:pointer;transition:background .2s ease}
+.gate-btn:hover{background:var(--flare)}
+.gate-btn:disabled{opacity:.6;cursor:default}
+.gate-err{color:#ff6a5c;font-family:var(--mono);font-size:12px;margin:2px 0 0}
+.gate-skip{display:block;width:100%;margin:16px 0 0;background:none;border:0;color:var(--mute);font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer}
+.gate-skip:hover{color:var(--paper);text-decoration:underline}
+.gate-fine{color:#6E6C68;font-size:11.5px;line-height:1.5;margin:18px 0 0}
+.gate-success{text-align:center;padding:14px 0 6px;position:relative;z-index:2}
+.gate-success h3{font-family:var(--display);font-weight:400;font-size:34px;text-transform:uppercase;margin:6px 0 12px}
+.gate-success p{color:#C6C3BD;margin:0 auto;max-width:34ch}
+body.gate-open{overflow:hidden}
 </style>
 </head>
 <body>
+
+<div class="gate" id="gate" role="dialog" aria-modal="true" aria-labelledby="gateTitle" hidden>
+  <div class="gate-card">
+    <button class="gate-x" id="gateClose" type="button" aria-label="Close">&times;</button>
+    <p class="gate-kicker">DEKA Affiliate &middot; Limited giveaway</p>
+    <h2 class="gate-title" id="gateTitle">Win a <em>free</em><br>race entry</h2>
+    <p class="gate-sub">Enter your name and email for a chance to win a free DEKA race entry &mdash; and we&rsquo;ll send you the affiliate details.</p>
+    <form class="gate-form" id="gateForm" novalidate>
+      <input class="gate-input" id="gateName" name="name" type="text" placeholder="Full name" autocomplete="name" required>
+      <input class="gate-input" id="gateEmail" name="email" type="email" placeholder="Email address" autocomplete="email" required>
+      <button class="gate-btn" id="gateSubmit" type="submit"><span>Enter to win</span><span>&rarr;</span></button>
+      <p class="gate-err" id="gateErr" hidden>Please enter your name and a valid email.</p>
+    </form>
+    <button class="gate-skip" id="gateSkip" type="button">No thanks, just show me the page</button>
+    <p class="gate-fine">No purchase necessary. One entry per person. Winner notified by email. By entering you agree to receive DEKA affiliate updates. Void where prohibited.</p>
+  </div>
+</div>
+
 
 <header class="bar">
   <div class="wrap bar-in">
@@ -509,6 +556,52 @@ h1,h2,h3{font-family:var(--display);font-weight:400;text-transform:uppercase;mar
   if(a2) a2.addEventListener('click', function(){ mark(2); });
   Array.prototype.forEach.call(document.querySelectorAll('[data-mirror]'), function(el){
     el.addEventListener('click', function(){ mark(parseInt(el.getAttribute('data-mirror'),10)); });
+  });
+})();
+</script>
+
+<script>
+(function(){
+  var KEY='deka_gate_v1';
+  /* ==== LEAD DESTINATION (swap when chosen) ==== */
+  var LEAD_ENDPOINT='https://formspree.io/f/mbdnzdba';            /* Formspree/Sheet URL, or truthy for HubSpot */
+  var LEAD_MODE='formspree';       /* 'formspree' | 'sheet' | 'hubspot' */
+  var HS_PORTAL='', HS_FORM='';    /* HubSpot only */
+  /* ============================================= */
+  var gate=document.getElementById('gate'); if(!gate) return;
+  try{ if(localStorage.getItem(KEY)) return; }catch(e){}
+  function done(){ try{localStorage.setItem(KEY,'1');}catch(e){} }
+  function openGate(){ gate.hidden=false; document.body.classList.add('gate-open'); setTimeout(function(){var n=document.getElementById('gateName'); if(n)n.focus();},80); }
+  function closeGate(){ gate.hidden=true; document.body.classList.remove('gate-open'); }
+  setTimeout(openGate, 600);
+  document.getElementById('gateClose').addEventListener('click',function(){done();closeGate();});
+  document.getElementById('gateSkip').addEventListener('click',function(){done();closeGate();});
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&!gate.hidden){done();closeGate();} });
+  gate.addEventListener('click',function(e){ if(e.target===gate){done();closeGate();} });
+  document.getElementById('gateForm').addEventListener('submit',function(e){
+    e.preventDefault();
+    var name=document.getElementById('gateName').value.trim();
+    var email=document.getElementById('gateEmail').value.trim();
+    var err=document.getElementById('gateErr');
+    if(name.length<2 || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ err.textContent='Please enter your name and a valid email.'; err.hidden=false; return; }
+    err.hidden=true;
+    var btn=document.getElementById('gateSubmit'); btn.disabled=true; btn.innerHTML='<span>Submitting…</span>';
+    function success(){
+      done();
+      gate.querySelector('.gate-card').innerHTML='<p class="gate-kicker">You’re entered</p><div class="gate-success"><h3>You’re in.</h3><p>Watch your inbox — if you win a free race entry we’ll email you. Your two steps are just below.</p></div>';
+      setTimeout(closeGate, 2800);
+    }
+    function fail(){ btn.disabled=false; btn.innerHTML='<span>Enter to win</span><span>→</span>'; err.textContent='Something went wrong — please try again.'; err.hidden=false; }
+    if(!LEAD_ENDPOINT){ success(); return; } /* preview mode: no destination wired yet */
+    var req, fd=new FormData(); fd.append('name',name); fd.append('email',email);
+    if(LEAD_MODE==='hubspot'){
+      req=fetch('https://api.hsforms.com/submissions/v3/integration/submit/'+HS_PORTAL+'/'+HS_FORM,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fields:[{name:'firstname',value:name},{name:'email',value:email}]})});
+    } else if(LEAD_MODE==='sheet'){
+      req=fetch(LEAD_ENDPOINT,{method:'POST',mode:'no-cors',body:new URLSearchParams({name:name,email:email})});
+    } else {
+      req=fetch(LEAD_ENDPOINT,{method:'POST',headers:{'Accept':'application/json'},body:fd});
+    }
+    req.then(function(r){ (r.ok||r.type==='opaque')?success():fail(); }).catch(fail);
   });
 })();
 </script>
