@@ -102,6 +102,14 @@ h1,h2,h3{font-family:var(--display);font-weight:400;text-transform:uppercase;mar
 .done-note{display:none;margin:12px 0 0;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--green)}
 .step.is-done .done-note{display:block}
 .step.is-done .micro{display:none}
+.steps-cta{margin:clamp(32px,5vw,52px) auto 0;max-width:660px;text-align:center;padding-top:clamp(24px,4vw,36px);border-top:1px solid var(--rule)}
+.steps-cta p{margin:0 0 18px;color:#4A4A51;font-size:16.5px}
+.steps-cta p b{color:var(--ink)}
+.btn-ghost{display:inline-flex;align-items:center;justify-content:center;gap:12px;text-decoration:none;background:transparent;border:1.5px solid var(--ink);color:var(--ink);padding:15px 28px;font-family:var(--display);font-size:18px;text-transform:uppercase;letter-spacing:.03em;transition:background .2s ease,color .2s ease}
+.btn-ghost:hover{background:var(--ink);color:#fff}
+.btn-ghost .arw{font-family:var(--mono);font-size:15px;transition:transform .25s ease}
+.btn-ghost:hover .arw{transform:translateX(4px)}
+@media(max-width:520px){.btn-ghost{width:100%}}
 
 /* ---------- generic dark sections ---------- */
 .sec{padding:clamp(52px,8vw,94px) 0}
@@ -350,6 +358,11 @@ body.gate-open{overflow:hidden}
           <p class="done-note">You are in. Watch your inbox for onboarding.</p>
         </article>
 
+      </div>
+
+      <div class="steps-cta">
+        <p><b>Not ready to sign up?</b> Want to learn more first?</p>
+        <a class="btn-ghost" href="https://calendar.app.google/rsf2ncLvjJqRPJjz7" target="_blank" rel="noopener noreferrer"><span>Schedule a discovery call</span><span class="arw">&rarr;</span></a>
       </div>
     </div>
   </section>
