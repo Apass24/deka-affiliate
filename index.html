@@ -228,10 +228,13 @@ h1,h2,h3{font-family:var(--display);font-weight:400;text-transform:uppercase;mar
 body.gate-open{overflow:hidden}
 
 /* ---------- share affordances ---------- */
-.hero-share{display:inline-flex;align-items:center;gap:7px;margin:22px 0 0;background:none;border:0;padding:0;cursor:pointer;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#B9B6B0}
-.hero-share span{color:var(--red);transition:transform .2s ease}
-.hero-share:hover{color:var(--paper);text-decoration:underline;text-underline-offset:3px}
-.hero-share:hover span{transform:translateX(3px)}
+.hero-cta{display:inline-flex;align-items:center;gap:14px;margin:26px 0 0;padding:14px 20px;max-width:min(470px,100%);background:rgba(20,20,23,.55);border:1px solid var(--line);border-radius:11px;cursor:pointer;text-align:left;transition:border-color .2s ease,background .2s ease}
+.hero-cta:hover{border-color:var(--red);background:rgba(20,20,23,.85)}
+.hero-cta .hc-txt{display:flex;flex-direction:column;gap:3px}
+.hero-cta .hc-txt b{font-family:var(--mono);font-weight:700;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--red)}
+.hero-cta .hc-txt em{font-style:normal;color:#D2CFC9;font-family:var(--body);font-size:15px;line-height:1.35}
+.hero-cta .hc-arw{margin-left:auto;color:var(--red);font-family:var(--mono);font-size:16px;transition:transform .2s ease}
+.hero-cta:hover .hc-arw{transform:translateX(3px)}
 .gate-share{display:grid;gap:12px;margin:22px 0 4px}
 .gate-share .primary{display:flex;align-items:center;justify-content:center;gap:10px;background:var(--red);color:#fff;border:0;border-radius:9px;font-family:var(--display);font-size:19px;text-transform:uppercase;letter-spacing:.03em;padding:15px;cursor:pointer;transition:background .2s ease}
 .gate-share .primary:hover{background:var(--flare)}
@@ -294,7 +297,7 @@ body.gate-open{overflow:hidden}
         <span class="chip"><b>60%</b> of net event revenue</span>
         <span class="chip"><b>10 min</b> to sign up</span>
       </div>
-      <button class="hero-share" id="heroShare" type="button">Not a gym owner? Share DEKA with yours <span aria-hidden="true">&rarr;</span></button>
+      <button class="hero-cta" id="heroShare" type="button"><span class="hc-txt"><b>Not a gym owner?</b><em>Send this to your owner and race DEKA at your own gym.</em></span><span class="hc-arw" aria-hidden="true">&rarr;</span></button>
     </div>
   </section>
 
