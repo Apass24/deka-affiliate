@@ -238,14 +238,14 @@ body.gate-open{overflow:hidden}
 .gate-share{display:grid;gap:12px;margin:22px 0 4px}
 .gate-share .primary{display:flex;align-items:center;justify-content:center;gap:10px;background:var(--red);color:#fff;border:0;border-radius:9px;font-family:var(--display);font-size:19px;text-transform:uppercase;letter-spacing:.03em;padding:15px;cursor:pointer;transition:background .2s ease}
 .gate-share .primary:hover{background:var(--flare)}
-.gate-share .altlabel{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--mute);text-align:center;margin:2px 0 -2px}
+.gate-share .altlabel{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-indent:.18em;text-transform:uppercase;color:var(--mute);text-align:center;margin:2px 0 -2px}
 .gate-share .alt{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .gate-share .alt a,.gate-share .alt button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:66px;padding:10px 6px;background:#0F0F12;border:1px solid var(--line);border-radius:10px;cursor:pointer;color:var(--paper);text-decoration:none;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;transition:border-color .2s ease,background .2s ease,transform .12s ease}
 .gate-share .alt a:hover,.gate-share .alt button:hover{border-color:var(--red);background:rgba(224,39,28,.14)}
 .gate-share .alt a:active,.gate-share .alt button:active{transform:scale(.97)}
 .gate-share .alt .ic{font-size:20px;line-height:1}
 .gate-refer{margin:18px 0 2px;padding:16px 0 0;border-top:1px solid var(--line)}
-.gate-refer .refer-label{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);margin:0 0 10px;text-align:center}
+.gate-refer .refer-label{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-indent:.1em;text-transform:uppercase;color:var(--mute);margin:0 0 10px;text-align:center}
 .gate-refer input{width:100%;background:#0F0F12;border:1px solid var(--line);border-radius:9px;color:var(--paper);font-family:var(--body);font-size:15px;padding:13px 14px;margin:0 0 8px}
 .gate-refer input:focus{outline:none;border-color:var(--red)}
 .gate-refer input::placeholder{color:#7C7A76}
@@ -652,7 +652,7 @@ body.gate-open{overflow:hidden}
           +'<p class="gate-kicker">You’re entered</p>'
           +'<div class="gate-success">'
             +'<h3>You’re in.</h3>'
-            +'<p>Members can’t host DEKA — but your gym can. Send this to your owner so you get to race at home.</p>'
+            +'<p>Want to race DEKA at your own gym? Send this to your owner and let’s bring DEKA to your facility.</p>'
             +'<div class="gate-share">'
               +'<button class="primary" id="gateShareBtn" type="button"><span>Share with your gym owner</span><span aria-hidden="true">&rarr;</span></button>'
               +'<p class="altlabel">or send it directly</p>'
@@ -663,7 +663,7 @@ body.gate-open{overflow:hidden}
               +'</div>'
             +'</div>'
             +'<div class="gate-refer">'
-              +'<p class="refer-label">Want us to reach out too? Add your owner’s info</p>'
+              +'<p class="refer-label">Want us to reach out too? Add your gym information below</p>'
               +'<input id="refName" type="text" placeholder="Owner’s name" autocomplete="off">'
               +'<input id="refEmail" type="email" placeholder="Owner’s email" autocomplete="off">'
               +'<button class="refer-btn" id="refSend" type="button">Send the intro &rarr;</button>'
