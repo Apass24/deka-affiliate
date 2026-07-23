@@ -226,6 +226,20 @@ h1,h2,h3{font-family:var(--display);font-weight:400;text-transform:uppercase;mar
 .gate-success h3{font-family:var(--display);font-weight:400;font-size:34px;text-transform:uppercase;margin:6px 0 12px}
 .gate-success p{color:#C6C3BD;margin:0 auto;max-width:34ch}
 body.gate-open{overflow:hidden}
+
+/* ---------- share affordances ---------- */
+.hero-share{display:inline-flex;align-items:center;gap:7px;margin:22px 0 0;background:none;border:0;padding:0;cursor:pointer;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#B9B6B0}
+.hero-share span{color:var(--red);transition:transform .2s ease}
+.hero-share:hover{color:var(--paper);text-decoration:underline;text-underline-offset:3px}
+.hero-share:hover span{transform:translateX(3px)}
+.gate-share{display:grid;gap:12px;margin:22px 0 4px}
+.gate-share .primary{display:flex;align-items:center;justify-content:center;gap:10px;background:var(--red);color:#fff;border:0;border-radius:9px;font-family:var(--display);font-size:19px;text-transform:uppercase;letter-spacing:.03em;padding:15px;cursor:pointer;transition:background .2s ease}
+.gate-share .primary:hover{background:var(--flare)}
+.gate-share .alt{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px}
+.gate-share .alt a,.gate-share .alt button{background:none;border:0;padding:4px 2px;cursor:pointer;color:var(--mute);text-decoration:none;font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase}
+.gate-share .alt a:hover,.gate-share .alt button:hover{color:var(--paper);text-decoration:underline;text-underline-offset:3px}
+.gate-toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(12px);z-index:300;background:#0F0F12;border:1px solid var(--line);color:var(--paper);font-family:var(--mono);font-size:12px;letter-spacing:.05em;padding:12px 18px;border-radius:10px;box-shadow:0 16px 40px rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .25s ease,transform .25s ease}
+.gate-toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
 </head>
 <body>
@@ -280,6 +294,7 @@ body.gate-open{overflow:hidden}
         <span class="chip"><b>60%</b> of net event revenue</span>
         <span class="chip"><b>10 min</b> to sign up</span>
       </div>
+      <button class="hero-share" id="heroShare" type="button">Not a gym owner? Share DEKA with yours <span aria-hidden="true">&rarr;</span></button>
     </div>
   </section>
 
@@ -582,16 +597,23 @@ body.gate-open{overflow:hidden}
   var LEAD_MODE='formspree';       /* 'formspree' | 'sheet' | 'hubspot' */
   var HS_PORTAL='', HS_FORM='';    /* HubSpot only */
   /* ============================================= */
+  var SHARE_URL='https://apass24.github.io/deka-affiliate/?ref=member';
+  var SHARE_TEXT='You should bring DEKA to our gym — host official events and enter to win a free race entry:';
+  var MEMBER_ROLE='Member/Client/Fitness enthusiast';
   var gate=document.getElementById('gate'); if(!gate) return;
   try{ if(localStorage.getItem(KEY)) return; }catch(e){}
   function done(){ try{localStorage.setItem(KEY,'1');}catch(e){} }
   function openGate(){ gate.hidden=false; document.body.classList.add('gate-open'); setTimeout(function(){var n=document.getElementById('gateName'); if(n)n.focus();},80); }
   function closeGate(){ gate.hidden=true; document.body.classList.remove('gate-open'); }
+  function showToast(msg){ var t=document.getElementById('gateToast'); if(!t){ t=document.createElement('div'); t.id='gateToast'; t.className='gate-toast'; t.setAttribute('role','status'); document.body.appendChild(t); } t.textContent=msg; t.classList.add('on'); clearTimeout(t._h); t._h=setTimeout(function(){ t.classList.remove('on'); },2200); }
+  function copyLink(){ function ok(){ showToast('Link copied — paste it to your gym owner'); } function fallback(){ try{ var ta=document.createElement('textarea'); ta.value=SHARE_URL; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); ok(); }catch(e){ showToast('Copy this link: '+SHARE_URL); } } if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(SHARE_URL).then(ok,fallback); } else { fallback(); } }
+  function shareDeka(){ if(navigator.share){ navigator.share({title:'DEKA Affiliate',text:SHARE_TEXT,url:SHARE_URL}).catch(function(){}); } else { copyLink(); } }
   setTimeout(openGate, 600);
   document.getElementById('gateClose').addEventListener('click',function(){done();closeGate();});
   document.getElementById('gateSkip').addEventListener('click',function(){done();closeGate();});
   document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&!gate.hidden){done();closeGate();} });
   gate.addEventListener('click',function(e){ if(e.target===gate){done();closeGate();} });
+  var hs=document.getElementById('heroShare'); if(hs) hs.addEventListener('click',shareDeka);
   document.getElementById('gateForm').addEventListener('submit',function(e){
     e.preventDefault();
     var name=document.getElementById('gateName').value.trim();
@@ -606,8 +628,33 @@ body.gate-open{overflow:hidden}
     var btn=document.getElementById('gateSubmit'); btn.disabled=true; btn.innerHTML='<span>Submitting…</span>';
     function success(){
       done();
-      gate.querySelector('.gate-card').innerHTML='<p class="gate-kicker">You’re entered</p><div class="gate-success"><h3>You’re in.</h3><p>Watch your inbox — if you win a free race entry we’ll email you. Your two steps are just below.</p></div>';
-      setTimeout(closeGate, 2800);
+      var card=gate.querySelector('.gate-card');
+      if(role===MEMBER_ROLE){
+        var msg=encodeURIComponent(SHARE_TEXT+' '+SHARE_URL);
+        card.innerHTML=''
+          +'<button class="gate-x" id="gateClose2" type="button" aria-label="Close">&times;</button>'
+          +'<p class="gate-kicker">You’re entered</p>'
+          +'<div class="gate-success">'
+            +'<h3>You’re in.</h3>'
+            +'<p>Members can’t host DEKA — but your gym can. Send this to your owner so you get to race at home.</p>'
+            +'<div class="gate-share">'
+              +'<button class="primary" id="gateShareBtn" type="button"><span>Share with your gym owner</span><span aria-hidden="true">&rarr;</span></button>'
+              +'<div class="alt">'
+                +'<a href="sms:?&body='+msg+'">Text</a>'
+                +'<a href="mailto:?subject=Bring%20DEKA%20to%20our%20gym%3F&body='+msg+'">Email</a>'
+                +'<button type="button" id="gateCopyBtn">Copy link</button>'
+              +'</div>'
+            +'</div>'
+            +'<button class="gate-skip" id="gateSkip2" type="button">Maybe later — show me the page</button>'
+          +'</div>';
+        document.getElementById('gateShareBtn').addEventListener('click',shareDeka);
+        document.getElementById('gateCopyBtn').addEventListener('click',copyLink);
+        document.getElementById('gateClose2').addEventListener('click',function(){closeGate();});
+        document.getElementById('gateSkip2').addEventListener('click',function(){closeGate();});
+      } else {
+        card.innerHTML='<p class="gate-kicker">You’re entered</p><div class="gate-success"><h3>You’re in.</h3><p>Watch your inbox — if you win a free race entry we’ll email you. Your two steps are just below.</p></div>';
+        setTimeout(closeGate, 2800);
+      }
     }
     function fail(){ btn.disabled=false; btn.innerHTML='<span>Enter to win</span><span>→</span>'; err.textContent='Something went wrong — please try again.'; err.hidden=false; }
     if(!LEAD_ENDPOINT){ success(); return; } /* preview mode: no destination wired yet */
