@@ -620,7 +620,7 @@ body.gate-open{overflow:hidden}
 
 <script>
 (function(){
-  var KEY='deka_gate_v1';
+  var KEY='deka_gate_v2';
   /* ==== LEAD DESTINATION (swap when chosen) ==== */
   var LEAD_ENDPOINT='https://formspree.io/f/mbdnzdba';            /* Formspree/Sheet URL, or truthy for HubSpot */
   var LEAD_MODE='formspree';       /* 'formspree' | 'sheet' | 'hubspot' */
@@ -638,10 +638,10 @@ body.gate-open{overflow:hidden}
   function copyLink(){ function ok(){ showToast('Link copied — paste it to your gym owner'); } function fallback(){ try{ var ta=document.createElement('textarea'); ta.value=SHARE_URL; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); ok(); }catch(e){ showToast('Copy this link: '+SHARE_URL); } } if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(SHARE_URL).then(ok,fallback); } else { fallback(); } }
   function shareDeka(){ if(navigator.share){ navigator.share({title:'DEKA Affiliate',text:SHARE_TEXT,url:SHARE_URL}).catch(function(){}); } else { copyLink(); } }
   setTimeout(openGate, 600);
-  document.getElementById('gateClose').addEventListener('click',function(){done();closeGate();});
-  document.getElementById('gateSkip').addEventListener('click',function(){done();closeGate();});
-  document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&!gate.hidden){done();closeGate();} });
-  gate.addEventListener('click',function(e){ if(e.target===gate){done();closeGate();} });
+  document.getElementById('gateClose').addEventListener('click',function(){closeGate();});
+  document.getElementById('gateSkip').addEventListener('click',function(){closeGate();});
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&!gate.hidden){closeGate();} });
+  gate.addEventListener('click',function(e){ if(e.target===gate){closeGate();} });
   var hs=document.getElementById('heroShare'); if(hs) hs.addEventListener('click',shareDeka);
   document.getElementById('gateForm').addEventListener('submit',function(e){
     e.preventDefault();
